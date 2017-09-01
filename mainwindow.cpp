@@ -50,7 +50,7 @@ void MainWindow::executaTimer(){
     for(int i = 0; i < linhas.length(); i++){
          QList<QString> colunas = linhas[i].split(" ");
          colunas.removeAll("");
-         qDebug() << colunas;
+//         qDebug() << colunas;
 //         USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
          QString user = colunas[0];
          QString pid = colunas[1];
