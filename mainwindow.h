@@ -21,6 +21,12 @@ public:
     ~MainWindow();
 private slots:
     void executaTimer();
+    void get_processo_selecionado(QTableWidgetItem* item);
+    void on_altera_core_button_clicked();
+
+    void on_pushButton_clicked();
+    void on_pushButton_2_clicked();
+
 private:
     Ui::MainWindow *ui;
     QTimer * timer;

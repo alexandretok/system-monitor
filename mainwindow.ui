@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>667</width>
+    <width>1166</width>
     <height>602</height>
    </rect>
   </property>
@@ -130,7 +130,7 @@
        <widget class="QComboBox" name="comboBox"/>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_3">
+       <widget class="QPushButton" name="altera_core_button">
         <property name="text">
          <string>Alterar</string>
         </property>
@@ -172,8 +172,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>667</width>
-     <height>20</height>
+     <width>1166</width>
+     <height>19</height>
     </rect>
    </property>
   </widget>

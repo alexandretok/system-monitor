@@ -1,14 +1,40 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QDebug>
+#include <signal.h> // definição dos sinais de interrupções
+#include <unistd.h> // para: pegar numero de processadores
+#include <sched.h> // para escolher CPU
+
+int selected_pid = 0;
+QList<QString> lista_processos;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
     this->timer = new QTimer();
 
+    connect(ui->tabela_processos, SIGNAL(itemClicked(QTableWidgetItem*)),
+                this, SLOT(get_processo_selecionado(QTableWidgetItem*)));
+
+    // add lista com numero de cores para comboBox
+    int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
+    QStringList cores_list;
+    for (int i = 1; i <= num_cores; ++i) {
+       cores_list << QString::number(i);
+    }
+    qDebug() << cores_list;
+    ui->comboBox->addItems(cores_list);
+
     connect(this->timer, SIGNAL(timeout()), this, SLOT(executaTimer()));
     this->timer->setInterval(1000);
     this->timer->start();
+}
+
+void MainWindow::get_processo_selecionado(QTableWidgetItem* item){
+
+    int index = item->row();
+    selected_pid = ui->tabela_processos->item(index,1)->text().toInt();
+    qDebug() << selected_pid;
+
 }
 
 void MainWindow::executaTimer(){
@@ -26,9 +52,6 @@ void MainWindow::executaTimer(){
     QString stdout = process.readAllStandardOutput();
     QString stderr = process.readAllStandardError();
 
-//    qDebug() << stdout;
-//    qDebug() << stderr;
-
     QList<QString> linhas = stdout.split("\n");
     linhas.removeLast();
 
@@ -41,8 +64,6 @@ void MainWindow::executaTimer(){
         linhas.removeLast();
     }
 
-//    qDebug() << linhas;
-
 
     ui->tabela_processos->clearContents();
     ui->tabela_processos->setRowCount(0);
@@ -50,7 +71,6 @@ void MainWindow::executaTimer(){
     for(int i = 0; i < linhas.length(); i++){
          QList<QString> colunas = linhas[i].split(" ");
          colunas.removeAll("");
-//         qDebug() << colunas;
 //         USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
          QString user = colunas[0];
          QString pid = colunas[1];
@@ -73,6 +93,13 @@ void MainWindow::executaTimer(){
          ui->tabela_processos->setItem(i,4,new QTableWidgetItem(status));
          ui->tabela_processos->setItem(i,5,new QTableWidgetItem(processo));
 
+         QString processo_info = pid + ";RODANDO";
+         lista_processos.push_back(processo_info);
+
+         if(selected_pid == pid.toInt()){
+            ui->tabela_processos->selectRow(i);
+         }
+
 
     }
 
@@ -80,7 +107,75 @@ void MainWindow::executaTimer(){
 
 }
 
-MainWindow::~MainWindow()
+void MainWindow::on_altera_core_button_clicked(){
+
+    if(selected_pid == 0){
+        qDebug() << "nenhum processo selecionado";
+    }
+    else{
+        QString core_selecionado = ui->comboBox->currentText();
+        qDebug() << "muda processo " << selected_pid << " para core " << core_selecionado;
+
+        cpu_set_t mask;
+
+        CPU_ZERO( &mask );
+
+        CPU_SET( core_selecionado.toInt()-1, &mask );
+
+        /* sched_setaffinity returns 0 in success */
+        if( sched_setaffinity( 0, sizeof(mask), &mask ) == -1 ){
+            qDebug() << "CPU Affinity não funcionou...";
+        }
+        qDebug() << "Rodando no core " << core_selecionado;
+    }
+
+}
+
+void MainWindow::on_pushButton_clicked(){
+
+    if(selected_pid == 0){
+        qDebug() << "nenhum processo selecionado";
+    }
+    else{
+        kill(selected_pid, SIGKILL);
+
+        qDebug() << "matou processo " << selected_pid;
+    }
+
+}
+
+void MainWindow::on_pushButton_2_clicked()
 {
+    if(selected_pid == 0){
+        qDebug() << "nenhum processo selecionado";
+    }
+    else{
+//        qDebug() << lista_processos;
+        for (int i = 0; i < lista_processos.length(); ++i) {
+            if(lista_processos[i].split(";")[0] == QString::number(selected_pid)){
+                if(lista_processos[i].split(";")[1] == "RODANDO"){
+                    kill(selected_pid, SIGSTOP);
+                    lista_processos.removeAt(i);
+                    QString processo_info = selected_pid + ";PAUSADO";
+                    lista_processos.push_front(processo_info);
+                    ui->pushButton_2->setText("Continuar");
+                }
+                else if(lista_processos[i].split(";")[1] == "PAUSADO"){
+                    kill(selected_pid, SIGCONT);
+                    lista_processos.removeAt(i);
+                    QString processo_info = selected_pid + ";RODANDO";
+                    lista_processos.push_front(processo_info);
+                    ui->pushButton_2->setText("Pausar");
+                }
+
+
+            }
+
+        }
+    }
+}
+
+MainWindow::~MainWindow(){
     delete ui;
 }
+
