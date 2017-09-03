@@ -60,7 +60,7 @@ void MainWindow::get_processo_selecionado(QTableWidgetItem* item){
 
 void MainWindow::executaTimer(){
     QString comando = "bash -c";
-    comando += " \"ps -axo user,pid,pcpu,pmem,stat,psr,comm";
+    comando += " \"ps -axo user,pid,pcpu,pmem,stat,psr,args";
     if(!ui->filtro->text().isEmpty())
         comando += " | grep '" + ui->filtro->text() + "'";
 
@@ -80,11 +80,11 @@ void MainWindow::executaTimer(){
     if(ui->filtro->text().isEmpty()){
         linhas.removeFirst();
         if(linhas.length() > 2){
-//            linhas.removeLast();
+            linhas.removeLast();
         }
     } else {
         if(linhas.length() > 2){
-//            linhas.removeLast();
+            linhas.removeLast();
 //            linhas.removeLast();
         }
     }

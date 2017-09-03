@@ -141,7 +141,14 @@
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBox"/>
+       <widget class="QComboBox" name="comboBox">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="altera_core_button">
