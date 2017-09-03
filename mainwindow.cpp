@@ -31,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     this->executaTimer();
 
     ui->tabela_processos->setColumnWidth(0, 60);
-    ui->tabela_processos->setColumnWidth(1, 40);
+    ui->tabela_processos->setColumnWidth(1, 50);
     ui->tabela_processos->setColumnWidth(2, 60);
     ui->tabela_processos->setColumnWidth(3, 80);
     ui->tabela_processos->setColumnWidth(4, 50);
