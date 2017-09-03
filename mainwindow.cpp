@@ -13,8 +13,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);
     this->timer = new QTimer();
 
-    connect(ui->tabela_processos, SIGNAL(itemClicked(QTableWidgetItem*)),
-                this, SLOT(get_processo_selecionado(QTableWidgetItem*)));
+   // connect(ui->tabela_processos, SIGNAL(itemClicked(QTableWidgetItem*)),
+     //           this, SLOT(get_processo_selecionado(QTableWidgetItem*)));
+
+    connect(ui->tabela_processos, SIGNAL(itemSelectionChanged()),
+                this, SLOT(get_mudanca_selecao_lista()));
 
     // add lista com numero de cores para comboBox
     int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
@@ -38,17 +41,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->tabela_processos->setColumnWidth(5, 40);
 }
 
-void MainWindow::get_processo_selecionado(QTableWidgetItem* item){
+void::MainWindow::get_mudanca_selecao_lista(){
 
-    int index = item->row();
-    selected_pid = ui->tabela_processos->item(index,1)->text().toInt();
-    selected_status = ui->tabela_processos->item(index,4)->text();
-//    qDebug() << selected_pid;
-//    qDebug() << selected_status;
+    int index_changed = ui->tabela_processos->currentRow();
+    qDebug() << "pid changed: " << ui->tabela_processos->item(index_changed,1)->text().toInt();
+    selected_pid = ui->tabela_processos->item(index_changed,1)->text().toInt();
+    selected_status = ui->tabela_processos->item(index_changed,4)->text();
 
     // atualiza o core usado no combo box
     if(selected_pid > 0){
-        int core = ui->tabela_processos->item(ui->tabela_processos->currentIndex().row(),5)->text().toInt();
+        int core = ui->tabela_processos->item(index_changed,5)->text().toInt();
         ui->comboBox->setCurrentIndex(core-1);
     }
 
@@ -57,6 +59,26 @@ void MainWindow::get_processo_selecionado(QTableWidgetItem* item){
     else
         ui->pushButton_2->setText("Continuar");
 }
+
+//void MainWindow::get_processo_selecionado(QTableWidgetItem* item){
+
+//    int index = item->row();
+//    selected_pid = ui->tabela_processos->item(index,1)->text().toInt();
+//    selected_status = ui->tabela_processos->item(index,4)->text();
+//    qDebug() << selected_pid;
+//    qDebug() << selected_status;
+
+//    // atualiza o core usado no combo box
+//    if(selected_pid > 0){
+//        int core = ui->tabela_processos->item(ui->tabela_processos->currentIndex().row(),5)->text().toInt();
+//        ui->comboBox->setCurrentIndex(core-1);
+//    }
+
+//    if(selected_status != "T")
+//        ui->pushButton_2->setText("Pausar");
+//    else
+//        ui->pushButton_2->setText("Continuar");
+//}
 
 void MainWindow::executaTimer(){
     QString comando = "bash -c";
