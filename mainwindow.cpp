@@ -8,13 +8,11 @@
 int selected_pid = 0;
 QString selected_status = "";
 QList<QString> lista_processos;
+bool mudando_core = false;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
     this->timer = new QTimer();
-
-   // connect(ui->tabela_processos, SIGNAL(itemClicked(QTableWidgetItem*)),
-     //           this, SLOT(get_processo_selecionado(QTableWidgetItem*)));
 
     connect(ui->tabela_processos, SIGNAL(itemSelectionChanged()),
                 this, SLOT(get_mudanca_selecao_lista()));
@@ -49,7 +47,7 @@ void::MainWindow::get_mudanca_selecao_lista(){
     selected_status = ui->tabela_processos->item(index_changed,4)->text();
 
     // atualiza o core usado no combo box
-    if(selected_pid > 0){
+    if(selected_pid > 0 && !mudando_core){
         int core = ui->tabela_processos->item(index_changed,5)->text().toInt();
         ui->comboBox->setCurrentIndex(core-1);
     }
@@ -59,26 +57,6 @@ void::MainWindow::get_mudanca_selecao_lista(){
     else
         ui->pushButton_2->setText("Continuar");
 }
-
-//void MainWindow::get_processo_selecionado(QTableWidgetItem* item){
-
-//    int index = item->row();
-//    selected_pid = ui->tabela_processos->item(index,1)->text().toInt();
-//    selected_status = ui->tabela_processos->item(index,4)->text();
-//    qDebug() << selected_pid;
-//    qDebug() << selected_status;
-
-//    // atualiza o core usado no combo box
-//    if(selected_pid > 0){
-//        int core = ui->tabela_processos->item(ui->tabela_processos->currentIndex().row(),5)->text().toInt();
-//        ui->comboBox->setCurrentIndex(core-1);
-//    }
-
-//    if(selected_status != "T")
-//        ui->pushButton_2->setText("Pausar");
-//    else
-//        ui->pushButton_2->setText("Continuar");
-//}
 
 void MainWindow::executaTimer(){
     QString comando = "bash -c";
@@ -168,6 +146,7 @@ void MainWindow::on_altera_core_button_clicked(){
             qDebug() << "CPU Affinity não funcionou...";
         }
         qDebug() << "Rodando no core " << core_selecionado;
+        mudando_core = false;
     }
 
 }
@@ -197,6 +176,12 @@ void MainWindow::on_pushButton_2_clicked() {
             ui->pushButton_2->setText("Pausar");
         }
     }
+}
+
+void MainWindow::on_comboBox_activated(int index)
+{
+    mudando_core = true;
+    qDebug() << "muda combobox para " << index;
 }
 
 MainWindow::~MainWindow(){

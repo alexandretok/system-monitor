@@ -23,12 +23,13 @@ public:
 
 private slots:
     void executaTimer();
-    //void get_processo_selecionado(QTableWidgetItem* item);
     void get_mudanca_selecao_lista();
     void on_altera_core_button_clicked();
 
     void on_pushButton_clicked();
     void on_pushButton_2_clicked();
+
+    void on_comboBox_activated(int index);
 
 private:
     Ui::MainWindow *ui;
